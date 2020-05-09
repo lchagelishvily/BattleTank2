@@ -18,15 +18,15 @@ class Tank(Sprite):
         self.screen_rect = bt_game.screen.get_rect()
         self.bullets = pygame.sprite.Group()
 
-        self.move_sprites = [pygame.transform.scale2x(pygame.image.load('../images/tanks/gt1.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/gt2.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/gt3.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/gt4.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/gt5.png').convert_alpha())]
+        self.move_sprites = [pygame.image.load('../data/images/tanks/gt1.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/gt2.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/gt3.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/gt4.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/gt5.png').convert_alpha()]
 
         self.image = self.move_sprites[0]
         self.rect = self.image.get_rect()
-        self.rect.midbottom = self.screen_rect.midbottom
+        self.rect.x = 0
 
     def move_right(self):
         self.is_moving = True
@@ -62,7 +62,10 @@ class Tank(Sprite):
         return self.screen_rect.contains(self.rect)
 
     def _is_collided(self, bt_game):
-        pass
+        bt_game.all_objects.remove(self)
+        result = pygame.sprite.spritecollideany(self, bt_game.all_objects)
+        bt_game.all_objects.add(self)
+        return result
 
     def _get_animation_idx(self):
         self.animation_count += 1

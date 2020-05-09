@@ -1,54 +1,64 @@
+
 import itertools
 import sys
-
 import pygame
 from pygame import event
+import pytmx
+
 from enemy import Enemy
 from src.player import Player
 from src.settings import Settings
+from tmx_loader import Renderer
 
 
 class BattleTank:
 
-    clock = pygame.time.Clock()
-
     def __init__(self):
 
-        # Инициализация экрана
         pygame.init()
-        self.settings = Settings()
-        self.screen = pygame.display.set_mode((640, 480))
-        self.settings.screen_height = self.screen.get_rect().height
-        self.settings.screen_width = self.screen.get_rect().width
-        self.bg = pygame.transform.scale2x(pygame.image.load('../images/tiles/bg.png').convert())
         pygame.display.set_caption("Battle Tank")
 
-        # Генерация поля
-        # Todo Вынести в отдельный метод
+        self.settings = Settings()
+        self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
+        self.clock = pygame.time.Clock()
+        self.fps = self.settings.fps
+        self.blocks = pygame.sprite.Group()
+        self.all_objects = pygame.sprite.Group()
         self.all_tanks = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
-        new_enemy = Enemy(self)
-        self.enemies.add(new_enemy)
-        self.all_tanks.add(new_enemy)
-        self.player = Player(self)
+        self.bg = None
+        self.player = None
 
-        self.all_tanks.add(self.player)
+    def load_game(self):
+        renderer = Renderer('../data/maps/level_1.tmx')
+        self.bg = renderer.get_background()
+        self.all_objects = renderer.get_blocks()
+
+        self.player = Player(self)
+        self.player.rect.x = 0
+        self.all_objects.add(self.player)
+
+        enemy1 = Enemy(self)
+        enemy1.rect.x = 0
+        enemy2 = Enemy(self)
+        enemy2.rect.x = self.settings.screen_width - enemy2.rect.width
+        self.enemies.add(enemy1)
+        self.enemies.add(enemy2)
+
+        self.all_objects.add(enemy1)
+        self.all_objects.add(enemy2)
 
     def run_game(self):
         while True:
-
-            self.clock.tick(30)
+            self.clock.tick(self.fps)
             self._check_events()
-            self.player.update(self)
-            self.player.bullets.update(self)
-            self.enemies.update(self)
+            self.all_objects.update(self)
             self._update_screen()
 
     def _check_events(self):
 
         key_event = pygame.event.poll()
 
-        #for key_event in pygame.event.get():
         if key_event.type == pygame.QUIT:
             sys.exit()
         elif key_event.type == pygame.KEYDOWN:
@@ -68,7 +78,7 @@ class BattleTank:
         elif key_event.key == pygame.K_DOWN:
             self.player.move_down()
         elif key_event.key == pygame.K_SPACE:
-            self.player.fire(self)
+            self.all_objects.add(self.player.fire(self))
 
     def _check_keyup_events(self, key_event):
         if key_event.key == pygame.K_RIGHT \
@@ -78,22 +88,12 @@ class BattleTank:
             self.player.stop()
 
     def _update_screen(self):
-        self.setup_background()
-        self.all_tanks.draw(self.screen)
-
-        for bullet in self.player.bullets.sprites():
-            bullet.draw()
+        self.screen.blit(self.bg, self.bg.get_rect())
+        self.all_objects.draw(self.screen)
         pygame.display.flip()
-
-    def setup_background(self):
-
-        background = pygame.transform.scale2x(pygame.image.load('../images/tiles/bg.png'))
-        brick_width, brick_height = background.get_width(), background.get_height()
-        for x, y in itertools.product(range(0, self.settings.screen_width, brick_width),
-                                      range(0, self.settings.screen_height, brick_height)):
-            self.screen.blit(background, (x, y))
 
 
 if __name__ == '__main__':
     bt = BattleTank()
+    bt.load_game()
     bt.run_game()

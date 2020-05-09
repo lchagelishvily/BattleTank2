@@ -9,16 +9,15 @@ class Player(Tank):
         super(Player, self).__init__(bt_game)
         self.speed = self.settings.player_speed
         self.direction = 'U'
-        self.move_sprites = [pygame.transform.scale2x(pygame.image.load('../images/tanks/gt1.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/gt2.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/gt3.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/gt4.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/gt5.png').convert_alpha())]
+        self.move_sprites = [pygame.image.load('../data/images/tanks/gt1.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/gt2.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/gt3.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/gt4.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/gt5.png').convert_alpha()]
         self.rect.midbottom = self.screen_rect.midbottom
 
     def fire(self, bt_game):
-        new_bullet = Bullet(bt_game, self)
-        self.bullets.add(new_bullet)
+        return Bullet(bt_game, self)
 
     def update(self, bt_game):
 
@@ -45,8 +44,6 @@ class Player(Tank):
     def _can_move(self, bt_game):
         return self._is_in_screen and not self._is_collided(bt_game)
 
-    def _is_collided(self, bt_game):
-        return pygame.sprite.spritecollideany(self, bt_game.enemies)
 
 
 

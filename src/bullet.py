@@ -1,7 +1,9 @@
 
 import pygame
 from pygame.sprite import Sprite
-
+from constants import BLOCK_TYPES
+import enemy
+import block
 
 class Bullet(Sprite):
 
@@ -13,8 +15,8 @@ class Bullet(Sprite):
         self.direction = owner.direction
         self.owner = owner
         self.screen_rect = bt_game.screen.get_rect()
-        self.image = pygame.transform.scale2x(pygame.image.load('../images/shots/bullet.png').convert_alpha())
-        self.explosion = pygame.transform.scale2x(pygame.image.load('../images/shots/shot.png').convert_alpha())
+        self.image = pygame.transform.scale2x(pygame.image.load('../data/images/shots/bullet.png').convert_alpha())
+        self.explosion = pygame.transform.scale2x(pygame.image.load('../data/images/shots/shot.png').convert_alpha())
         self.rect = self.image.get_rect()
 
         if self.direction == 'U':
@@ -54,8 +56,24 @@ class Bullet(Sprite):
         return self.screen_rect.contains(self.rect)
 
     def _is_collided(self, bt_game):
-        single_group = pygame.sprite.GroupSingle(self)
-        return pygame.sprite.groupcollide(single_group, bt_game.enemies, True, True)
+        result = False
+        bt_game.all_objects.remove(self)
+        bt_game.all_objects.remove(self.owner)
+        collisions = pygame.sprite.spritecollide(self, bt_game.all_objects, False, False)
+        bt_game.all_objects.add(self)
+        bt_game.all_objects.add(self.owner)
+        if collisions:
+            self.kill()
+            result = True
+
+        for collision in collisions:
+            if isinstance(collision, enemy.Enemy):
+                collision.kill()
+            elif isinstance(collision, block.Block) \
+                    and collision.block_type != BLOCK_TYPES.IRON:
+                collision.kill()
+
+        return result
 
     def draw(self):
         pygame.draw.rect(self.screen, self.color, self.rect)

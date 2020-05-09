@@ -1,6 +1,5 @@
 import random
 import pygame
-from src.bullet import  Bullet
 from tank import Tank
 
 
@@ -9,22 +8,20 @@ class Enemy(Tank):
     def __init__(self, bt_game):
         
         super(Enemy, self).__init__(bt_game)
-        self.speed = bt_game.settings.player_speed
+        self.speed = bt_game.settings.enemy_speed
         self.is_moving = True
         self.direction = 'D'
         self.change_direction_delay = self.settings.enemy_change_direction_delay
 
-        self.move_sprites = [pygame.transform.scale2x(pygame.image.load('../images/tanks/rt1.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/rt2.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/rt3.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/rt4.png').convert_alpha()),
-                             pygame.transform.scale2x(pygame.image.load('../images/tanks/rt5.png').convert_alpha())]
+        self.move_sprites = [pygame.image.load('../data/images/tanks/rt1.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/rt2.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/rt3.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/rt4.png').convert_alpha(),
+                             pygame.image.load('../data/images/tanks/rt5.png').convert_alpha()]
 
-        self.rect.midtop = self.screen_rect.midtop
 
     def fire(self):
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
+        pass
 
     def update(self, bt_game):
 
@@ -57,9 +54,4 @@ class Enemy(Tank):
     def _can_move(self, bt_game):
         return self._is_in_screen and not self._is_collided(bt_game)
 
-    def _is_collided(self, bt_game):
-        bt_game.all_tanks.remove(self)
-        is_collided = pygame.sprite.spritecollideany(self, bt_game.all_tanks)
-        bt_game.all_tanks.add(self)
-        return is_collided
 
